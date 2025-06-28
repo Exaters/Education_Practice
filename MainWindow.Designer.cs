@@ -190,7 +190,7 @@
             label6.Name = "label6";
             label6.Size = new Size(101, 19);
             label6.TabIndex = 13;
-            label6.Text = "По формуле:";
+            label6.Text = "Рассчёт по формуле:";
             // 
             // label7
             // 
@@ -199,7 +199,7 @@
             label7.Name = "label7";
             label7.Size = new Size(91, 19);
             label7.TabIndex = 14;
-            label7.Text = "По методу:";
+            label7.Text = "Рассчёт по методу Монте-Карло:";
             // 
             // toolStrip1
             // 

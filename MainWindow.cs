@@ -55,8 +55,8 @@ namespace Education_practice
             double formulaArea = CalculateSegmentArea(_r, _x0, _y0, _distance, lineType);
             double monteCarloArea = CalculateMonteCarloArea(_r, _x0, _y0, _distance, lineType, points);
 
-            label6.Text = $"По формуле: {formulaArea:F4}";
-            label7.Text = $"По методу: {monteCarloArea:F4}";
+            label6.Text = $"Рассчёт по формуле: {formulaArea:F4}";
+            label7.Text = $"Рассчёт по методу Монте-Карло: {monteCarloArea:F4}";
             SaveResults(lineType, points, formulaArea, monteCarloArea);
             pictureBox.Invalidate();
         }
