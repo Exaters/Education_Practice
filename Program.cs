@@ -1,7 +1,4 @@
 using Education_Practice;
-using System;
-using System.Threading;
-using System.Windows.Forms;
 
 namespace Education_practice
 {
@@ -14,8 +11,8 @@ namespace Education_practice
 
             SplashScreen splash = new SplashScreen();
             splash.Show();
-            Application.DoEvents(); // ќбновл€ем окно
-            Thread.Sleep(3000); // ∆дЄм 3 секунды
+            Application.DoEvents();
+            Thread.Sleep(3000);
             splash.Close();
 
             Application.Run(new MainWindow());

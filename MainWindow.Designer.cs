@@ -188,7 +188,7 @@
             label6.AutoSize = true;
             label6.Location = new Point(219, 104);
             label6.Name = "label6";
-            label6.Size = new Size(101, 19);
+            label6.Size = new Size(158, 19);
             label6.TabIndex = 13;
             label6.Text = "Рассчёт по формуле:";
             // 
@@ -197,7 +197,7 @@
             label7.AutoSize = true;
             label7.Location = new Point(568, 104);
             label7.Name = "label7";
-            label7.Size = new Size(91, 19);
+            label7.Size = new Size(248, 19);
             label7.TabIndex = 14;
             label7.Text = "Рассчёт по методу Монте-Карло:";
             // 
@@ -220,6 +220,7 @@
             Exit.Name = "Exit";
             Exit.Size = new Size(53, 22);
             Exit.Text = "Выйти";
+            Exit.Click += Exit_Click;
             // 
             // Statistics
             // 
@@ -235,6 +236,7 @@
             Help.Name = "Help";
             Help.Size = new Size(67, 22);
             Help.Text = "Справка";
+            Help.Click += Help_Click;
             // 
             // Information_about_programm
             // 
@@ -242,6 +244,7 @@
             Information_about_programm.Name = "Information_about_programm";
             Information_about_programm.Size = new Size(199, 22);
             Information_about_programm.Text = "Информация о программе";
+            Information_about_programm.Click += Information_about_programm_Click;
             // 
             // MainWindow
             // 

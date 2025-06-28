@@ -1,7 +1,4 @@
-﻿using System;
-using System.Data;
-using System.Drawing;
-using System.Windows.Forms;
+﻿using System.Data;
 using System.Windows.Forms.DataVisualization.Charting;
 
 namespace Education_practice
@@ -22,13 +19,11 @@ namespace Education_practice
 
         private void InitializeCustomComponents()
         {
-            // Настройка формы
             this.BackColor = Color.LightCyan;
             this.ForeColor = Color.DarkSlateGray;
             this.Font = new Font("Times New Roman", 10.2F);
             this.Text = "Статистика расчетов";
 
-            // Создаем кнопку удаления
             deleteButton = new Button
             {
                 Text = "Очистить статистику",
@@ -45,7 +40,6 @@ namespace Education_practice
             deleteButton.Click += DeleteButton_Click;
             this.Controls.Add(deleteButton);
 
-            // Создаем DataGridView для отображения данных
             dataGridView = new DataGridView
             {
                 BackColor = Color.LightCyan,
@@ -61,7 +55,6 @@ namespace Education_practice
                 ScrollBars = ScrollBars.Vertical
             };
 
-            // Настраиваем стиль DataGridView
             dataGridView.DefaultCellStyle.BackColor = Color.LightCyan;
             dataGridView.DefaultCellStyle.ForeColor = Color.DarkSlateGray;
             dataGridView.DefaultCellStyle.SelectionBackColor = Color.Gold;
@@ -75,14 +68,13 @@ namespace Education_practice
 
             this.Controls.Add(dataGridView);
 
-            // Создаем график с новыми параметрами
             chart = new Chart
             {
                 BackColor = Color.LightCyan,
                 Location = new Point(10, 50),
                 Size = new Size(860, 600),
                 Visible = false,
-                Padding = new Padding(10) // Добавляем отступы
+                Padding = new Padding(10)
             };
 
             ChartArea chartArea = new ChartArea
@@ -117,21 +109,24 @@ namespace Education_practice
         {
             DataTable results = DatabaseHelper.GetAllResults();
 
-            // Настраиваем DataGridView
             dataGridView.DataSource = results;
             dataGridView.Columns["Id"].Visible = false;
 
-            // Форматируем столбцы
             if (dataGridView.Columns.Contains("FormulaResult"))
+            {
                 dataGridView.Columns["FormulaResult"].HeaderText = "Формула";
+            }
 
             if (dataGridView.Columns.Contains("MonteCarloResult"))
+            {
                 dataGridView.Columns["MonteCarloResult"].HeaderText = "Монте-Карло";
+            }
 
             if (dataGridView.Columns.Contains("N"))
+            {
                 dataGridView.Columns["N"].HeaderText = "Итерации";
+            }
 
-            // Создаем график
             CreateChart(results);
         }
 
@@ -157,13 +152,13 @@ namespace Education_practice
                 int n = Convert.ToInt32(row["N"]);
 
                 double difference = Math.Abs(formula - monte);
-                series.Points.AddXY(n, difference);
+                _ = series.Points.AddXY(n, difference);
                 series.Points[series.Points.Count - 1].Tag = n;
             }
 
             chart.Series.Add(series);
             chart.Titles.Clear();
-            chart.Titles.Add("Разница между формулой и методом Монте-Карло");
+            _ = chart.Titles.Add("Разница между формулой и методом Монте-Карло");
         }
 
         private void ToggleViewButton_Click(object sender, EventArgs e)
@@ -201,14 +196,14 @@ namespace Education_practice
                     DatabaseHelper.DeleteAllResult();
                     dataGridView.DataSource = null;
                     chart.Series.Clear();
-                    MessageBox.Show("Данные успешно удалены!",
+                    _ = MessageBox.Show("Данные успешно удалены!",
                                 "Успех",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка при удалении: {ex.Message}",
+                    _ = MessageBox.Show($"Ошибка при удалении: {ex.Message}",
                                 "Ошибка",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Error);
