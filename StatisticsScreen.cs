@@ -10,155 +10,146 @@ namespace Education_practice
     {
         private Chart chart;
         private ToolTip toolTip = new ToolTip();
+        private Button deleteButton;
+        private DataGridView dataGridView;
 
         public StatisticsScreen()
         {
             InitializeComponent();
-            AddDeleteButton();
-            CreateHistogram();
+            InitializeCustomComponents();
+            LoadData();
         }
 
-        private void AddDeleteButton()
+        private void InitializeCustomComponents()
         {
-            // Создаем маленькую кнопку удаления
-            // В метод AddDeleteButton():
-            Button deleteButton = new Button
+            // Настройка формы
+            this.BackColor = Color.LightCyan;
+            this.ForeColor = Color.DarkSlateGray;
+            this.Font = new Font("Times New Roman", 10.2F);
+            this.Text = "Статистика расчетов";
+
+            // Создаем кнопку удаления
+            deleteButton = new Button
             {
-                Text = "", // Убираем текст
-                BackgroundImage = SystemIcons.Error.ToBitmap(), // Иконка ошибки (красный крестик)
-                BackgroundImageLayout = ImageLayout.Stretch,
+                Text = "Очистить статистику",
+                BackColor = Color.DarkSlateBlue,
+                ForeColor = Color.Gold,
                 FlatStyle = FlatStyle.Flat,
-                Size = new Size(25, 25),
-                Location = new Point(5, 5),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left,
+                Size = new Size(180, 30),
+                Location = new Point(20, 20),
                 Cursor = Cursors.Hand,
-                TabStop = false // Чтобы не фокусировалась по Tab
+                Font = new Font("Times New Roman", 10.2F, FontStyle.Bold)
             };
 
-            deleteButton.MouseEnter += (s, e) =>
-            {
-                deleteButton.BackColor = Color.FromArgb(220, 80, 80);
-                deleteButton.Size = new Size(27, 27);
-                deleteButton.Location = new Point(4, 4);
-            };
-
-            deleteButton.MouseLeave += (s, e) =>
-            {
-                deleteButton.BackColor = Color.Red;
-                deleteButton.Size = new Size(25, 25);
-                deleteButton.Location = new Point(5, 5);
-            };
-
-            // Убираем стандартные границы у кнопки
             deleteButton.FlatAppearance.BorderSize = 0;
+            deleteButton.Click += DeleteButton_Click;
+            this.Controls.Add(deleteButton);
 
-            // Обработчик клика
-            deleteButton.Click += (sender, e) =>
+            // Создаем DataGridView для отображения данных
+            dataGridView = new DataGridView
             {
-                var result = MessageBox.Show(
-                        "Все сохраненные результаты расчетов будут удалены.\nПродолжить?",
-                        "Подтверждение удаления",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Exclamation);
-
-                if (result == DialogResult.Yes)
-                {
-                    try
-                    {
-                        DatabaseHelper.DeleteAllResult();
-                        RefreshChart();
-                        MessageBox.Show("Данные успешно удалены!",
-                                      "Успех",
-                                      MessageBoxButtons.OK,
-                                      MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Ошибка при удалении: {ex.Message}",
-                                      "Ошибка",
-                                      MessageBoxButtons.OK,
-                                      MessageBoxIcon.Error);
-                    }
-                }
+                BackColor = Color.LightCyan,
+                ForeColor = Color.DarkSlateGray,
+                BorderStyle = BorderStyle.None,
+                Location = new Point(20, 70),
+                Size = new Size(860, 300),
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                RowHeadersVisible = false,
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                ReadOnly = true,
+                ScrollBars = ScrollBars.Vertical
             };
 
-            // Добавляем кнопку на форму
-            this.Controls.Add(deleteButton);
-            deleteButton.BringToFront();
-        }
-
-        private void Chart_MouseMove(object sender, MouseEventArgs e)
-        {
-            var hitTest = chart.HitTest(e.X, e.Y);
-
-            if (hitTest != null && hitTest.Object != null)
+            // Настраиваем стиль DataGridView
+            dataGridView.DefaultCellStyle.BackColor = Color.LightCyan;
+            dataGridView.DefaultCellStyle.ForeColor = Color.DarkSlateGray;
+            dataGridView.DefaultCellStyle.SelectionBackColor = Color.Gold;
+            dataGridView.DefaultCellStyle.SelectionForeColor = Color.DarkSlateBlue;
+            dataGridView.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
             {
-                if (hitTest.Object is DataPoint)
-                {
-                    DataPoint point = (DataPoint)hitTest.Object;
-                    int nValue = (int)point.Tag; // Получаем N из Tag точки
-                    double diffValue = point.YValues[0];
+                BackColor = Color.DarkSlateBlue,
+                ForeColor = Color.Gold,
+                Font = new Font("Times New Roman", 10.2F, FontStyle.Bold)
+            };
 
-                    // Показываем подсказку
-                    toolTip.Show($"N = {nValue}\nРазница = {diffValue:F4}",
-                                chart,
-                                e.X + 10,
-                                e.Y + 10,
-                                1000); // Показываем 1 секунду
-                }
-                else
-                {
-                    toolTip.Hide(chart);
-                }
-            }
-            else
-            {
-                toolTip.Hide(chart);
-            }
-        }
+            this.Controls.Add(dataGridView);
 
-        private void CreateHistogram()
-        {
-            // Удаляем старый график, если есть
-            if (chart != null)
-            {
-                chart.MouseMove -= Chart_MouseMove;
-                this.Controls.Remove(chart);
-                chart.Dispose();
-            }
-
-            // Получаем данные из базы
-            DataTable results = DatabaseHelper.GetAllResults();
-
-            // Создаем новый элемент Chart
+            // Создаем график с новыми параметрами
             chart = new Chart
             {
-                Dock = DockStyle.Fill,
-                Location = new Point(0, 0),
-                Size = new Size(this.ClientSize.Width, this.ClientSize.Height)
+                BackColor = Color.LightCyan,
+                Location = new Point(10, 50),
+                Size = new Size(860, 600),
+                Visible = false,
+                Padding = new Padding(10) // Добавляем отступы
             };
 
-            // Настраиваем область графика
-            ChartArea chartArea = new ChartArea();
-            chartArea.AxisX.Title = "N (количество испытаний)";
-            chartArea.AxisY.Title = "|Formula - MonteCarlo|";
-            chartArea.AxisX.IntervalAutoMode = IntervalAutoMode.VariableCount;
-            chart.ChartAreas.Add(chartArea);
+            ChartArea chartArea = new ChartArea
+            {
+                BackColor = Color.LightCyan,
+                AxisX = { LineColor = Color.DarkSlateGray, TitleForeColor = Color.DarkSlateGray },
+                AxisY = { LineColor = Color.DarkSlateGray, TitleForeColor = Color.DarkSlateGray }
+            };
 
-            // Создаем серию для гистограммы
+            chart.ChartAreas.Add(chartArea);
+            this.Controls.Add(chart);
+
+            // Кнопка переключения между таблицей и графиком
+            var toggleViewButton = new Button
+            {
+                Text = "Показать график",
+                BackColor = Color.DarkSlateBlue,
+                ForeColor = Color.Gold,
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(180, 30),
+                Location = new Point(220, 20),
+                Cursor = Cursors.Hand,
+                Font = new Font("Times New Roman", 10.2F, FontStyle.Bold)
+            };
+
+            toggleViewButton.FlatAppearance.BorderSize = 0;
+            toggleViewButton.Click += ToggleViewButton_Click;
+            this.Controls.Add(toggleViewButton);
+        }
+
+        private void LoadData()
+        {
+            DataTable results = DatabaseHelper.GetAllResults();
+
+            // Настраиваем DataGridView
+            dataGridView.DataSource = results;
+            dataGridView.Columns["Id"].Visible = false;
+
+            // Форматируем столбцы
+            if (dataGridView.Columns.Contains("FormulaResult"))
+                dataGridView.Columns["FormulaResult"].HeaderText = "Формула";
+
+            if (dataGridView.Columns.Contains("MonteCarloResult"))
+                dataGridView.Columns["MonteCarloResult"].HeaderText = "Монте-Карло";
+
+            if (dataGridView.Columns.Contains("N"))
+                dataGridView.Columns["N"].HeaderText = "Итерации";
+
+            // Создаем график
+            CreateChart(results);
+        }
+
+        private void CreateChart(DataTable results)
+        {
+            chart.Series.Clear();
+
             Series series = new Series
             {
                 ChartType = SeriesChartType.Column,
                 Name = "Разница методов",
-                Color = Color.SteelBlue,
-                BorderColor = Color.DarkBlue,
+                Color = Color.Gold,
+                BorderColor = Color.DarkSlateGray,
                 BorderWidth = 1,
                 IsValueShownAsLabel = true,
-                LabelFormat = "F4",
-                Tag = "Series1" // Добавляем тег для идентификации
+                LabelFormat = "F4"
             };
 
-            // Заполняем данными
             foreach (DataRow row in results.Rows)
             {
                 double formula = Convert.ToDouble(row["FormulaResult"]);
@@ -166,35 +157,85 @@ namespace Education_practice
                 int n = Convert.ToInt32(row["N"]);
 
                 double difference = Math.Abs(formula - monte);
-                DataPoint point = new DataPoint();
-                point.SetValueXY(n, difference);
-                point.Tag = n; // Сохраняем N в Tag точки
-                series.Points.Add(point);
+                series.Points.AddXY(n, difference);
+                series.Points[series.Points.Count - 1].Tag = n;
             }
 
             chart.Series.Add(series);
-
-            // Добавляем обработчик движения мыши
-            chart.MouseMove += Chart_MouseMove;
-
-            // Добавляем легенду
-            chart.Legends.Add(new Legend());
-
-            // Добавляем заголовок
-            chart.Titles.Add(new Title
-            {
-                Text = "Сравнение точности методов",
-                Font = new Font("Arial", 12, FontStyle.Bold)
-            });
-
-            // Добавляем Chart на форму
-            this.Controls.Add(chart);
-            chart.SendToBack();
+            chart.Titles.Clear();
+            chart.Titles.Add("Разница между формулой и методом Монте-Карло");
         }
 
-        private void RefreshChart()
+        private void ToggleViewButton_Click(object sender, EventArgs e)
         {
-            CreateHistogram();
+            var button = (Button)sender;
+
+            if (dataGridView.Visible)
+            {
+                dataGridView.Visible = false;
+                chart.Visible = true;
+                button.Text = "Показать таблицу";
+                this.Height = 720;
+            }
+            else
+            {
+                dataGridView.Visible = true;
+                chart.Visible = false;
+                button.Text = "Показать график";
+                this.Height = 420;
+            }
+        }
+
+        private void DeleteButton_Click(object sender, EventArgs e)
+        {
+            var result = MessageBox.Show(
+                "Все сохраненные результаты расчетов будут удалены.\nПродолжить?",
+                "Подтверждение удаления",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Exclamation);
+
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    DatabaseHelper.DeleteAllResult();
+                    dataGridView.DataSource = null;
+                    chart.Series.Clear();
+                    MessageBox.Show("Данные успешно удалены!",
+                                "Успех",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при удалении: {ex.Message}",
+                                "Ошибка",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void Chart_MouseMove(object sender, MouseEventArgs e)
+        {
+            var hitTest = chart.HitTest(e.X, e.Y);
+
+            if (hitTest != null && hitTest.Object != null && hitTest.Object is DataPoint)
+            {
+                DataPoint point = (DataPoint)hitTest.Object;
+                int nValue = (int)point.Tag;
+                double diffValue = point.YValues[0];
+
+                toolTip.Show($"N = {nValue}\nРазница = {diffValue:F4}",
+                          chart,
+                          e.X + 10,
+                          e.Y + 10,
+                          1000);
+            }
+            else
+            {
+                toolTip.Hide(chart);
+            }
         }
     }
 }
